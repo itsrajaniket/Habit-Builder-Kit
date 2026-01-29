@@ -1,6 +1,8 @@
 import { useState } from "react";
 import Header from "../components/Header";
 import Calendar from "../components/Calendar";
+import ProgressChart from "../components/ProgressChart";
+import MentalChart from "../components/MentalChart";
 
 function Dashboard({ onLogout }) {
   const [darkMode, setDarkMode] = useState(false);
@@ -31,6 +33,8 @@ function Dashboard({ onLogout }) {
       />
 
       <Calendar />
+      <ProgressChart />
+      <MentalChart />
     </div>
   );
 }

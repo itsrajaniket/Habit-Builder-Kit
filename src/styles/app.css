@@ -78,3 +78,18 @@ body {
 .empty {
   background: #f9f9f9;
 }
+.chart-container {
+  margin-top: 20px;
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.chart-title {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.mental-state {
+  margin-top: 30px;
+}
