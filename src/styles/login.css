@@ -1,0 +1,18 @@
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-box {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 350px;
+}
+
+.login-error {
+  color: red;
+  margin-top: 10px;
+}
