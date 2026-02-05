@@ -1,7 +1,7 @@
 import React from "react";
 
 function MentalStateGrid({ mentalState, onUpdate, currentDate }) {
-  // Use PASSED currentDate instead of new Date()
+  // Use PASSED currentDate
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -24,24 +24,37 @@ function MentalStateGrid({ mentalState, onUpdate, currentDate }) {
   }
 
   return (
-    <div className="calendar-section" style={{ marginTop: "0" }}>
+    <div
+      className="calendar-section"
+      style={{ marginTop: "0", padding: "20px" }}
+    >
       <h3
         className="month-title"
-        style={{ fontSize: "18px", marginBottom: "10px" }}
+        style={{ fontSize: "18px", marginBottom: "15px" }}
       >
         Mental State Log
       </h3>
-      <div className="calendar-grid" style={{ overflowX: "auto" }}>
-        <table className="calendar-table" style={{ minWidth: "100%" }}>
+
+      {/* REMOVED: overflowX: "auto" */}
+      <div className="calendar-grid">
+        <table
+          className="calendar-table"
+          style={{
+            width: "100%",
+            minWidth: "100%",
+            tableLayout: "fixed", // <--- Forces columns to fit inside
+            borderCollapse: "collapse",
+          }}
+        >
           <thead>
             <tr>
               <th
                 style={{
-                  minWidth: "100px",
-                  position: "sticky",
-                  left: 0,
-                  background: "var(--color-surface)",
-                  zIndex: 1,
+                  width: "100px", // Fixed width for the Label column
+                  textAlign: "left",
+                  paddingLeft: "10px",
+                  fontSize: "12px",
+                  color: "var(--text-secondary)",
                 }}
               >
                 Type
@@ -50,9 +63,11 @@ function MentalStateGrid({ mentalState, onUpdate, currentDate }) {
                 <th
                   key={item.dateStr}
                   style={{
-                    minWidth: "30px",
+                    // REMOVED: minWidth: "30px"
                     fontSize: "10px",
                     textAlign: "center",
+                    padding: "5px 0",
+                    overflow: "hidden", // Ensures no spillover
                   }}
                 >
                   {item.dayNum}
@@ -65,11 +80,10 @@ function MentalStateGrid({ mentalState, onUpdate, currentDate }) {
               <tr key={type}>
                 <td
                   style={{
-                    fontWeight: "bold",
-                    padding: "5px",
-                    position: "sticky",
-                    left: 0,
-                    background: "var(--color-surface)",
+                    fontWeight: "600",
+                    fontSize: "13px",
+                    paddingLeft: "10px",
+                    color: "var(--text-primary)",
                   }}
                 >
                   {type}
@@ -85,9 +99,14 @@ function MentalStateGrid({ mentalState, onUpdate, currentDate }) {
                         cursor: "pointer",
                         background:
                           val !== "-"
-                            ? "var(--color-success-light)"
+                            ? "rgba(16, 185, 129, 0.2)" // Light Green tint
                             : "transparent",
+                        color: val !== "-" ? "#10b981" : "inherit",
                         textAlign: "center",
+                        fontSize: "11px",
+                        fontWeight: "bold",
+                        padding: "6px 0", // Tighter padding
+                        borderLeft: "1px solid rgba(255,255,255,0.05)",
                       }}
                       onClick={() => handleCellClick(item.dateStr, type)}
                     >
