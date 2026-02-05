@@ -9,11 +9,10 @@ import AddHabitModal from "../components/AddHabitModal";
 import RemoveHabitModal from "../components/RemoveHabitModal";
 import Sidebar from "../components/Sidebar";
 
-// The new "Brain" we just created
+// Hooks
 import { useDashboardData } from "../hooks/useDashboardData";
 
 function Dashboard({ currentUser, onLogout }) {
-  // 1. Get all logic/data from our custom hook
   const {
     habits,
     mentalState,
@@ -33,7 +32,6 @@ function Dashboard({ currentUser, onLogout }) {
     stats,
   } = useDashboardData(currentUser);
 
-  // 2. Render the UI
   return (
     <div className="container">
       <Header
@@ -63,7 +61,6 @@ function Dashboard({ currentUser, onLogout }) {
             onToggleHabit={toggleHabitForDate}
             currentDate={currentDate}
             onChangeMonth={changeMonth}
-            bestStreak={stats.bestStreak}
             viewMode={viewMode}
           />
 
@@ -103,12 +100,12 @@ function Dashboard({ currentUser, onLogout }) {
         <Sidebar
           habits={habits}
           currentDate={currentDate}
+          bestStreak={stats.bestStreak} // <--- Added this prop
           onOpenAdd={() => setShowAddModal(true)}
           onOpenRemove={() => setShowRemoveModal(true)}
         />
       </div>
 
-      {/* MODALS */}
       <AddHabitModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}

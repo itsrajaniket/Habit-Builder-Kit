@@ -36,21 +36,27 @@ export function useDashboardData(currentUser) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
 
-  // Data Keys
+  // Data Keys (Unique per user)
   const HABIT_KEY = `user_${currentUser}_habitTrackerData`;
   const MENTAL_KEY = `user_${currentUser}_mentalData`;
 
-  // Load Data
+  // --- LOAD DATA ---
   const [habits, setHabits] = useState(() => {
+    // 1. Try to get saved data for THIS user
     const saved = localStorage.getItem(HABIT_KEY);
+
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
+        // Handle potential old data formats
         return Array.isArray(parsed) ? parsed : parsed.habits || DEFAULT_HABITS;
       } catch (e) {
+        // If error, fall back to defaults
         return DEFAULT_HABITS;
       }
     }
+
+    // 2. If NO saved data (First Time User), return the Starter Pack
     return DEFAULT_HABITS;
   });
 
@@ -59,7 +65,7 @@ export function useDashboardData(currentUser) {
     return saved ? JSON.parse(saved) : {};
   });
 
-  // --- EFFECTS ---
+  // --- EFFECTS (Auto-Save) ---
   useEffect(() => {
     localStorage.setItem(HABIT_KEY, JSON.stringify(habits));
   }, [habits, HABIT_KEY]);
@@ -130,17 +136,19 @@ export function useDashboardData(currentUser) {
     (acc, h) => acc + h.completedDates.length,
     0,
   );
+
+  // Simple calculation: Total Habits * 30 days (approximation for progress bar)
   const totalPossible = totalHabits * 30;
   const progressPercent =
     totalPossible === 0
       ? 0
       : Math.round((completedHabits / totalPossible) * 100);
+
   const bestStreak =
     habits.length > 0
       ? Math.max(...habits.map((h) => calculateStreak(h.completedDates)))
       : 0;
 
-  // Return everything the component needs
   return {
     habits,
     mentalState,

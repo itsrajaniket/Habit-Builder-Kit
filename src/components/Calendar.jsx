@@ -1,6 +1,4 @@
 import CalendarGrid from "./CalendarGrid";
-import Streaks from "./Streaks";
-import Badges from "./Badges";
 
 const MONTHS = [
   "January",
@@ -22,15 +20,12 @@ function Calendar({
   onToggleHabit,
   currentDate,
   onChangeMonth,
-  bestStreak,
   viewMode,
 }) {
-  // Format the title depending on Month or Week view
   let title = `${MONTHS[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
   if (viewMode === "week") {
-    // Basic week logic: Show "Week of [Date]"
     const startOfWeek = new Date(currentDate);
-    startOfWeek.setDate(currentDate.getDate() - currentDate.getDay()); // Go to Sunday
+    startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
     title = `Week of ${MONTHS[startOfWeek.getMonth()]} ${startOfWeek.getDate()}`;
   }
 
@@ -45,10 +40,7 @@ function Calendar({
         </div>
       </div>
 
-      <div className="streaks-badges-section">
-        <Streaks habits={habits} />
-        <Badges bestStreak={bestStreak} />
-      </div>
+      {/* Streaks and Badges removed from here */}
 
       <div className="calendar-grid-container" style={{ overflowX: "auto" }}>
         <CalendarGrid
