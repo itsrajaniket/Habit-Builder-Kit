@@ -16,7 +16,7 @@ function Streaks({ habits }) {
 
       <div
         className="streaks-list"
-        style={{ maxHeight: "140px", overflowY: "auto", paddingRight: "4px" }}
+        style={{ maxHeight: "300px", overflowY: "auto", paddingRight: "4px" }}
       >
         {activeStreaks.length === 0 ? (
           <div

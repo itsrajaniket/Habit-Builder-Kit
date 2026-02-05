@@ -19,7 +19,10 @@ function Analysis({ habits, currentDate }) {
   );
 
   return (
-    <div className="analysis-container">
+    <div
+      className="analysis-container"
+      style={{ maxHeight: "940px", overflowY: "auto", paddingRight: "4px" }}
+    >
       {sortedHabits.map((habit) => {
         const completed = getMonthCompletions(habit);
         const percent = Math.min(
