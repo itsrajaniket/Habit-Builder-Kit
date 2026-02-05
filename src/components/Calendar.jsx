@@ -1,5 +1,7 @@
 import { useState } from "react";
 import CalendarGrid from "./CalendarGrid";
+import Streaks from "./Streaks.jsx";
+import Badges from "./Badges";
 
 const MONTHS = [
   "January",
@@ -16,7 +18,7 @@ const MONTHS = [
   "December",
 ];
 
-function Calendar() {
+function Calendar({ habits, onToggleHabit }) {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   function changeMonth(direction) {
@@ -25,15 +27,15 @@ function Calendar() {
     setCurrentDate(newDate);
   }
 
-  const monthName = MONTHS[currentDate.getMonth()];
-  const year = currentDate.getFullYear();
+  // ✅ calculate best streak here
+  const bestStreak = Math.max(...habits.map((h) => h.completedDates.length), 0);
 
   return (
     <div className="calendar-section">
-      {/* Month Header */}
+      {/* 🔹 MONTH HEADER */}
       <div className="month-header">
         <h2 className="month-title">
-          {monthName} {year}
+          {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
         </h2>
 
         <div className="month-nav">
@@ -42,8 +44,16 @@ function Calendar() {
         </div>
       </div>
 
-      {/* Calendar Grid */}
-      <CalendarGrid date={currentDate} />
+      {/* ✅ BELOW MONTH HEADER (THIS IS WHAT YOU ASKED) */}
+      <Streaks habits={habits} />
+      <Badges bestStreak={bestStreak} />
+
+      {/* 🔹 CALENDAR GRID */}
+      <CalendarGrid
+        date={currentDate}
+        habits={habits}
+        onToggleHabit={onToggleHabit}
+      />
     </div>
   );
 }

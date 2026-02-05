@@ -7,15 +7,13 @@ function RemoveHabitModal({ isOpen, habits, onRemove, onClose }) {
         <div className="modal-header">Remove Habit</div>
 
         <div className="habit-list">
-          {habits.length === 0 && <p>No habits to remove.</p>}
-
-          {habits.map((habit, index) => (
+          {habits.map((habit) => (
             <button
-              key={index}
+              key={habit.id}
               className="habit-remove-item"
-              onClick={() => onRemove(index)}
+              onClick={() => onRemove(habit.id)}
             >
-              {habit}
+              {habit.emoji} {habit.name}
             </button>
           ))}
         </div>
