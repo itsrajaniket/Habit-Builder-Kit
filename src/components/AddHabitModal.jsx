@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-// Matches the emojis from your original project style
 const EMOJIS = [
   "🔥",
   "💧",
@@ -22,22 +21,21 @@ const EMOJIS = [
 
 function AddHabitModal({ isOpen, onClose, onAdd }) {
   const [habitName, setHabitName] = useState("");
-  const [selectedEmoji, setSelectedEmoji] = useState("🔥"); // Default
+  const [selectedEmoji, setSelectedEmoji] = useState("🔥");
 
   if (!isOpen) return null;
 
   function handleAdd() {
     if (!habitName.trim()) return;
-    onAdd(habitName, selectedEmoji); // Pass the emoji too
-
-    // Reset form
+    onAdd(habitName, selectedEmoji);
     setHabitName("");
     setSelectedEmoji("🔥");
     onClose();
   }
 
   return (
-    <div className="modal">
+    // ADDED: style={{ display: "flex" }} to override CSS 'display: none'
+    <div className="modal" style={{ display: "flex" }}>
       <div className="modal-content">
         <div className="modal-header">Add New Habit</div>
 
@@ -52,7 +50,7 @@ function AddHabitModal({ isOpen, onClose, onAdd }) {
           />
         </div>
 
-        {/* Emoji Grid (Restored Feature) */}
+        {/* Emoji Grid */}
         <div className="habit-input">
           <label>Choose Emoji</label>
           <div

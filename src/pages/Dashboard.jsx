@@ -10,7 +10,6 @@ import RemoveHabitModal from "../components/RemoveHabitModal";
 import Analysis from "../components/Analysis";
 import { calculateStreak } from "../utils/streaks";
 
-// --- DEFAULT HABITS ---
 const DEFAULT_HABITS = [
   { id: "1", name: "Wake up at 5:00", emoji: "⏰", completedDates: [] },
   { id: "2", name: "Gym / Exercise", emoji: "💪", completedDates: [] },
@@ -41,14 +40,14 @@ function Dashboard({ currentUser, onLogout }) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
 
-  // 1. GLOBAL DATE STATE (Lifted up from Calendar)
+  // 1. NEW STATE: View Mode ('month' or 'week')
+  const [viewMode, setViewMode] = useState("month");
+
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  // --- KEYS ---
   const HABIT_KEY = `user_${currentUser}_habitTrackerData`;
   const MENTAL_KEY = `user_${currentUser}_mentalData`;
 
-  // --- LOAD DATA ---
   const [habits, setHabits] = useState(() => {
     const saved = localStorage.getItem(HABIT_KEY);
     if (saved) {
@@ -67,7 +66,6 @@ function Dashboard({ currentUser, onLogout }) {
     return saved ? JSON.parse(saved) : {};
   });
 
-  // --- EFFECTS ---
   useEffect(() => {
     localStorage.setItem(HABIT_KEY, JSON.stringify(habits));
   }, [habits, HABIT_KEY]);
@@ -80,10 +78,14 @@ function Dashboard({ currentUser, onLogout }) {
     document.body.setAttribute("data-theme", darkMode ? "dark" : "light");
   }, [darkMode]);
 
-  // --- HANDLERS ---
   function changeMonth(direction) {
     const newDate = new Date(currentDate);
-    newDate.setMonth(currentDate.getMonth() + direction);
+    // If in week mode, jump by 7 days, else jump by 1 month
+    if (viewMode === "week") {
+      newDate.setDate(currentDate.getDate() + direction * 7);
+    } else {
+      newDate.setMonth(currentDate.getMonth() + direction);
+    }
     setCurrentDate(newDate);
   }
 
@@ -132,7 +134,6 @@ function Dashboard({ currentUser, onLogout }) {
     setDarkMode(!darkMode);
   }
 
-  // --- STATS ---
   const totalHabits = habits.length;
   const completedHabits = habits.reduce(
     (acc, h) => acc + h.completedDates.length,
@@ -151,7 +152,6 @@ function Dashboard({ currentUser, onLogout }) {
 
   return (
     <div className="container">
-      {/* Top Bar */}
       <div
         style={{
           display: "flex",
@@ -178,10 +178,11 @@ function Dashboard({ currentUser, onLogout }) {
         progressPercent={progressPercent}
         bestStreak={bestStreak}
         onToggleTheme={toggleTheme}
+        viewMode={viewMode} // <--- Pass Mode
+        setViewMode={setViewMode} // <--- Pass Setter
       />
 
       <div className="main-layout">
-        {/* LEFT COLUMN */}
         <div
           style={{
             display: "flex",
@@ -190,16 +191,15 @@ function Dashboard({ currentUser, onLogout }) {
             minWidth: 0,
           }}
         >
-          {/* Calendar: Now receives date and change handler */}
           <Calendar
             habits={habits}
             onToggleHabit={toggleHabitForDate}
             currentDate={currentDate}
             onChangeMonth={changeMonth}
             bestStreak={bestStreak}
+            viewMode={viewMode} // <--- Pass Mode to Calendar
           />
 
-          {/* Daily Progress: Now receives currentDate */}
           <div
             style={{
               background: "var(--color-surface)",
@@ -208,16 +208,12 @@ function Dashboard({ currentUser, onLogout }) {
               boxShadow: "var(--shadow-sm)",
             }}
           >
-            <h3 style={{ marginTop: 0 }}>
-              Daily Progress (
-              {currentDate.toLocaleString("default", { month: "long" })})
-            </h3>
+            <h3 style={{ marginTop: 0 }}>Daily Progress</h3>
             <div className="chart-container">
               <ProgressChart habits={habits} currentDate={currentDate} />
             </div>
           </div>
 
-          {/* Mental State Grid: Now receives currentDate */}
           <div
             style={{
               background: "var(--color-surface)",
@@ -233,7 +229,6 @@ function Dashboard({ currentUser, onLogout }) {
             />
           </div>
 
-          {/* Mental Trends: Now receives currentDate */}
           <div
             style={{
               background: "var(--color-surface)",
@@ -242,10 +237,7 @@ function Dashboard({ currentUser, onLogout }) {
               boxShadow: "var(--shadow-sm)",
             }}
           >
-            <h3 style={{ marginTop: 0 }}>
-              Mental State Trends (
-              {currentDate.toLocaleString("default", { month: "long" })})
-            </h3>
+            <h3 style={{ marginTop: 0 }}>Mental State Trends</h3>
             <div className="chart-container">
               <MentalChart
                 mentalState={mentalState}
@@ -255,29 +247,21 @@ function Dashboard({ currentUser, onLogout }) {
           </div>
         </div>
 
-        {/* RIGHT COLUMN */}
         <div className="analysis-section">
-          <h3>
-            Analysis ({currentDate.toLocaleString("default", { month: "long" })}
-            )
-          </h3>
+          <h3>Analysis</h3>
           <Analysis habits={habits} currentDate={currentDate} />
 
-          <div
-            className="action-buttons"
-            style={{ marginTop: "20px", display: "flex", gap: "10px" }}
-          >
+          {/* New CSS Classes applied here */}
+          <div className="action-buttons">
             <button
               className="add-habit-btn"
               onClick={() => setShowAddModal(true)}
-              style={{ flex: 1 }}
             >
               + Add Habit
             </button>
             <button
               className="remove-habit-btn"
               onClick={() => setShowRemoveModal(true)}
-              style={{ flex: 1 }}
             >
               − Remove
             </button>

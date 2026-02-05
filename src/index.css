@@ -986,3 +986,45 @@ canvas {
     grid-template-columns: repeat(6, 1fr);
   }
 }
+/* --- Action Buttons Fix --- */
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.add-habit-btn,
+.remove-habit-btn {
+  flex: 1; /* Both take equal width */
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.add-habit-btn {
+  background-color: var(--color-success); /* Green */
+  color: white;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.remove-habit-btn {
+  background-color: var(--color-danger); /* Red */
+  color: white;
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
+
+.add-habit-btn:hover,
+.remove-habit-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}

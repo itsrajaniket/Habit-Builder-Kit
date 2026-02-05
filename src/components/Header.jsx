@@ -6,6 +6,8 @@ function Header({
   progressPercent,
   bestStreak,
   onToggleTheme,
+  viewMode, // NEW
+  setViewMode, // NEW
 }) {
   return (
     <div className="header">
@@ -13,7 +15,6 @@ function Header({
         <h1>Habit Tracker Pro</h1>
 
         <div className="header-controls">
-          {/* Dark Mode Toggle */}
           <button
             className="theme-toggle"
             onClick={onToggleTheme}
@@ -22,10 +23,20 @@ function Header({
             🌙
           </button>
 
-          {/* Calendar View Toggle (UI only for now) */}
+          {/* Toggle Buttons Now Work */}
           <div className="calendar-view-toggle">
-            <button className="view-toggle-btn active">Month</button>
-            <button className="view-toggle-btn">Week</button>
+            <button
+              className={`view-toggle-btn ${viewMode === "month" ? "active" : ""}`}
+              onClick={() => setViewMode("month")}
+            >
+              Month
+            </button>
+            <button
+              className={`view-toggle-btn ${viewMode === "week" ? "active" : ""}`}
+              onClick={() => setViewMode("week")}
+            >
+              Week
+            </button>
           </div>
         </div>
       </div>
