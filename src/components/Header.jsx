@@ -1,38 +1,49 @@
+import React from "react";
 import Stats from "./Stats";
 
 function Header({
+  currentUser,
   totalHabits,
   completedHabits,
   progressPercent,
   bestStreak,
   onToggleTheme,
-  viewMode, // NEW
-  setViewMode, // NEW
+  onLogout,
+  viewMode,
+  setViewMode,
 }) {
   return (
-    <div className="header">
-      <div className="header-top">
-        <h1>Habit Tracker Pro</h1>
+    <div className="header-card">
+      {/* TOP ROW: Title, User, Controls */}
+      <div className="header-top-row">
+        <div className="header-brand">
+          <h1>Habit Tracker Pro</h1>
+          {/* User Badge - Light Green with Wave Emoji */}
+          <span className="user-badge">👋 {currentUser}</span>
+        </div>
 
         <div className="header-controls">
           <button
-            className="theme-toggle"
+            className="theme-btn"
             onClick={onToggleTheme}
-            title="Toggle Dark Mode"
+            title="Toggle Theme"
           >
             🌙
           </button>
 
-          {/* Toggle Buttons Now Work */}
-          <div className="calendar-view-toggle">
+          <button className="logout-btn" onClick={onLogout}>
+            Logout
+          </button>
+
+          <div className="view-toggle">
             <button
-              className={`view-toggle-btn ${viewMode === "month" ? "active" : ""}`}
+              className={`toggle-btn ${viewMode === "month" ? "active" : ""}`}
               onClick={() => setViewMode("month")}
             >
               Month
             </button>
             <button
-              className={`view-toggle-btn ${viewMode === "week" ? "active" : ""}`}
+              className={`toggle-btn ${viewMode === "week" ? "active" : ""}`}
               onClick={() => setViewMode("week")}
             >
               Week
@@ -41,12 +52,15 @@ function Header({
         </div>
       </div>
 
-      <Stats
-        totalHabits={totalHabits}
-        completedHabits={completedHabits}
-        progressPercent={progressPercent}
-        bestStreak={bestStreak}
-      />
+      {/* BOTTOM ROW: The Horizontal Stats */}
+      <div className="header-stats-row">
+        <Stats
+          totalHabits={totalHabits}
+          completedHabits={completedHabits}
+          progressPercent={progressPercent}
+          bestStreak={bestStreak}
+        />
+      </div>
     </div>
   );
 }

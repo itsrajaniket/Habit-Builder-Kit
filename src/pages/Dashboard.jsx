@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Chart } from "chart.js/auto";
 import Header from "../components/Header";
 import Calendar from "../components/Calendar";
 import ProgressChart from "../components/ProgressChart";
@@ -40,9 +39,7 @@ function Dashboard({ currentUser, onLogout }) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
 
-  // 1. NEW STATE: View Mode ('month' or 'week')
   const [viewMode, setViewMode] = useState("month");
-
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const HABIT_KEY = `user_${currentUser}_habitTrackerData`;
@@ -80,7 +77,6 @@ function Dashboard({ currentUser, onLogout }) {
 
   function changeMonth(direction) {
     const newDate = new Date(currentDate);
-    // If in week mode, jump by 7 days, else jump by 1 month
     if (viewMode === "week") {
       newDate.setDate(currentDate.getDate() + direction * 7);
     } else {
@@ -152,37 +148,21 @@ function Dashboard({ currentUser, onLogout }) {
 
   return (
     <div className="container">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "10px",
-        }}
-      >
-        <div style={{ opacity: 0.7 }}>
-          User: <strong>{currentUser}</strong>
-        </div>
-        <button
-          className="btn-remove"
-          onClick={onLogout}
-          style={{ padding: "5px 10px", fontSize: "12px" }}
-        >
-          Logout
-        </button>
-      </div>
-
+      {/* HEADER NOW HANDLES EVERYTHING (User, Logout, Stats) */}
       <Header
+        currentUser={currentUser}
+        onLogout={onLogout}
         totalHabits={totalHabits}
         completedHabits={completedHabits}
         progressPercent={progressPercent}
         bestStreak={bestStreak}
         onToggleTheme={toggleTheme}
-        viewMode={viewMode} // <--- Pass Mode
-        setViewMode={setViewMode} // <--- Pass Setter
+        viewMode={viewMode}
+        setViewMode={setViewMode}
       />
 
       <div className="main-layout">
+        {/* LEFT COLUMN */}
         <div
           style={{
             display: "flex",
@@ -197,31 +177,20 @@ function Dashboard({ currentUser, onLogout }) {
             currentDate={currentDate}
             onChangeMonth={changeMonth}
             bestStreak={bestStreak}
-            viewMode={viewMode} // <--- Pass Mode to Calendar
+            viewMode={viewMode}
           />
 
-          <div
-            style={{
-              background: "var(--color-surface)",
-              padding: "20px",
-              borderRadius: "12px",
-              boxShadow: "var(--shadow-sm)",
-            }}
-          >
-            <h3 style={{ marginTop: 0 }}>Daily Progress</h3>
+          <div className="card-container">
+            <h3 className="section-title">
+              Daily Progress (
+              {currentDate.toLocaleString("default", { month: "long" })})
+            </h3>
             <div className="chart-container">
               <ProgressChart habits={habits} currentDate={currentDate} />
             </div>
           </div>
 
-          <div
-            style={{
-              background: "var(--color-surface)",
-              padding: "20px",
-              borderRadius: "12px",
-              boxShadow: "var(--shadow-sm)",
-            }}
-          >
+          <div className="card-container">
             <MentalStateGrid
               mentalState={mentalState}
               onUpdate={updateMentalState}
@@ -229,15 +198,11 @@ function Dashboard({ currentUser, onLogout }) {
             />
           </div>
 
-          <div
-            style={{
-              background: "var(--color-surface)",
-              padding: "20px",
-              borderRadius: "12px",
-              boxShadow: "var(--shadow-sm)",
-            }}
-          >
-            <h3 style={{ marginTop: 0 }}>Mental State Trends</h3>
+          <div className="card-container">
+            <h3 className="section-title">
+              Mental State Trends (
+              {currentDate.toLocaleString("default", { month: "long" })})
+            </h3>
             <div className="chart-container">
               <MentalChart
                 mentalState={mentalState}
@@ -247,11 +212,14 @@ function Dashboard({ currentUser, onLogout }) {
           </div>
         </div>
 
+        {/* RIGHT COLUMN */}
         <div className="analysis-section">
-          <h3>Analysis</h3>
+          <h3>
+            Analysis ({currentDate.toLocaleString("default", { month: "long" })}
+            )
+          </h3>
           <Analysis habits={habits} currentDate={currentDate} />
 
-          {/* New CSS Classes applied here */}
           <div className="action-buttons">
             <button
               className="add-habit-btn"
