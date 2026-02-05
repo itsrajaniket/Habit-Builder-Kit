@@ -1,41 +1,34 @@
 import { useEffect, useRef } from "react";
 import { Chart } from "chart.js/auto";
 
-function ProgressChart({ habits }) {
+function ProgressChart({ habits, currentDate }) {
   const canvasRef = useRef(null);
   const chartRef = useRef(null);
 
   useEffect(() => {
-    // 1. Calculate Data for the last 7 days
+    // Use passed currentDate
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
     const labels = [];
     const dataPoints = [];
-    const today = new Date();
 
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      const dateStr = d.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      labels.push(d);
 
-      // Label (e.g., "Mon")
-      labels.push(d.toLocaleDateString("en-US", { weekday: "short" }));
-
-      // Count completions for this day
       let count = 0;
       habits.forEach((habit) => {
         if (habit.completedDates.includes(dateStr)) count++;
       });
 
-      // Calculate percentage for that day
       const percentage = habits.length > 0 ? (count / habits.length) * 100 : 0;
       dataPoints.push(percentage);
     }
 
-    // 2. Destroy old chart if exists
-    if (chartRef.current) {
-      chartRef.current.destroy();
-    }
+    if (chartRef.current) chartRef.current.destroy();
 
-    // 3. Create new Chart
     if (canvasRef.current) {
       chartRef.current = new Chart(canvasRef.current, {
         type: "line",
@@ -47,8 +40,9 @@ function ProgressChart({ habits }) {
               data: dataPoints,
               borderColor: "#4caf50",
               backgroundColor: "rgba(76, 175, 80, 0.2)",
-              tension: 0.3,
+              tension: 0.2,
               fill: true,
+              pointRadius: 2,
             },
           ],
         },
@@ -58,24 +52,17 @@ function ProgressChart({ habits }) {
           plugins: { legend: { display: false } },
           scales: {
             y: { beginAtZero: true, max: 100 },
+            x: { grid: { display: false } },
           },
         },
       });
     }
-
     return () => {
       chartRef.current?.destroy();
     };
-  }, [habits]); // Re-run when habits change
+  }, [habits, currentDate]); // Re-run when date changes
 
-  return (
-    <div className="chart-container">
-      <div className="chart-title">Last 7 Days Progress</div>
-      <div style={{ height: "200px" }}>
-        <canvas ref={canvasRef}></canvas>
-      </div>
-    </div>
-  );
+  return <canvas ref={canvasRef} style={{ height: "200px", width: "100%" }} />;
 }
 
 export default ProgressChart;

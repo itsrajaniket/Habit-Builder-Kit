@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
+import { Chart } from "chart.js/auto";
 import Header from "../components/Header";
 import Calendar from "../components/Calendar";
 import ProgressChart from "../components/ProgressChart";
 import MentalChart from "../components/MentalChart";
-import MentalStateGrid from "../components/MentalStateGrid"; // <--- NEW IMPORT
+import MentalStateGrid from "../components/MentalStateGrid";
 import AddHabitModal from "../components/AddHabitModal";
 import RemoveHabitModal from "../components/RemoveHabitModal";
 import Analysis from "../components/Analysis";
 import { calculateStreak } from "../utils/streaks";
 
+// --- DEFAULT HABITS ---
 const DEFAULT_HABITS = [
   { id: "1", name: "Wake up at 5:00", emoji: "⏰", completedDates: [] },
   { id: "2", name: "Gym / Exercise", emoji: "💪", completedDates: [] },
@@ -36,28 +38,36 @@ const DEFAULT_HABITS = [
 
 function Dashboard({ currentUser, onLogout }) {
   const [darkMode, setDarkMode] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
 
-  // --- DYNAMIC KEYS BASED ON USER ---
-  // Matches the old app key exactly:
+  // 1. GLOBAL DATE STATE (Lifted up from Calendar)
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  // --- KEYS ---
   const HABIT_KEY = `user_${currentUser}_habitTrackerData`;
   const MENTAL_KEY = `user_${currentUser}_mentalData`;
 
-  // 1. Load Habits
+  // --- LOAD DATA ---
   const [habits, setHabits] = useState(() => {
     const saved = localStorage.getItem(HABIT_KEY);
-    return saved ? JSON.parse(saved) : DEFAULT_HABITS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return Array.isArray(parsed) ? parsed : parsed.habits || DEFAULT_HABITS;
+      } catch (e) {
+        return DEFAULT_HABITS;
+      }
+    }
+    return DEFAULT_HABITS;
   });
 
-  // 2. Load Mental State
   const [mentalState, setMentalState] = useState(() => {
     const saved = localStorage.getItem(MENTAL_KEY);
     return saved ? JSON.parse(saved) : {};
   });
 
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showRemoveModal, setShowRemoveModal] = useState(false);
-
-  // 3. Persistence Effects
+  // --- EFFECTS ---
   useEffect(() => {
     localStorage.setItem(HABIT_KEY, JSON.stringify(habits));
   }, [habits, HABIT_KEY]);
@@ -66,85 +76,97 @@ function Dashboard({ currentUser, onLogout }) {
     localStorage.setItem(MENTAL_KEY, JSON.stringify(mentalState));
   }, [mentalState, MENTAL_KEY]);
 
-  // --- HANDLERS ---
+  useEffect(() => {
+    document.body.setAttribute("data-theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
 
-  function addHabit(name, emoji = "🔥") {
-    setHabits((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        name,
-        emoji,
-        completedDates: [],
-      },
-    ]);
+  // --- HANDLERS ---
+  function changeMonth(direction) {
+    const newDate = new Date(currentDate);
+    newDate.setMonth(currentDate.getMonth() + direction);
+    setCurrentDate(newDate);
   }
 
-  function removeHabit(id) {
-    if (confirm("Are you sure? This cannot be undone.")) {
-      setHabits((prev) => prev.filter((h) => h.id !== id));
-      setShowRemoveModal(false);
-    }
+  function addHabit(name, emoji) {
+    const newHabit = {
+      id: Date.now().toString(),
+      name,
+      emoji,
+      completedDates: [],
+    };
+    setHabits([...habits, newHabit]);
   }
 
   function toggleHabitForDate(habitId, dateStr) {
-    setHabits((prev) =>
-      prev.map((habit) =>
-        habit.id === habitId
-          ? {
-              ...habit,
-              completedDates: habit.completedDates.includes(dateStr)
-                ? habit.completedDates.filter((d) => d !== dateStr)
-                : [...habit.completedDates, dateStr],
-            }
-          : habit,
-      ),
+    setHabits(
+      habits.map((h) => {
+        if (h.id === habitId) {
+          const exists = h.completedDates.includes(dateStr);
+          return {
+            ...h,
+            completedDates: exists
+              ? h.completedDates.filter((d) => d !== dateStr)
+              : [...h.completedDates, dateStr],
+          };
+        }
+        return h;
+      }),
     );
+  }
+
+  function removeHabit(habitId) {
+    if (confirm("Are you sure you want to remove this habit?")) {
+      setHabits(habits.filter((h) => h.id !== habitId));
+      setShowRemoveModal(false);
+    }
   }
 
   function updateMentalState(date, type, value) {
     setMentalState((prev) => ({
       ...prev,
-      [date]: {
-        ...prev[date],
-        [type]: value,
-      },
+      [date]: { ...prev[date], [type]: value },
     }));
   }
 
-  // Stats Calculations
+  function toggleTheme() {
+    setDarkMode(!darkMode);
+  }
+
+  // --- STATS ---
   const totalHabits = habits.length;
   const completedHabits = habits.reduce(
-    (sum, h) => sum + h.completedDates.length,
+    (acc, h) => acc + h.completedDates.length,
     0,
   );
+  const totalPossible = totalHabits * 30;
+  const progressPercent =
+    totalPossible === 0
+      ? 0
+      : Math.round((completedHabits / totalPossible) * 100);
+
   const bestStreak =
     habits.length > 0
       ? Math.max(...habits.map((h) => calculateStreak(h.completedDates)))
       : 0;
-  const progressPercent =
-    totalHabits === 0
-      ? 0
-      : Math.round((completedHabits / (totalHabits * 30)) * 100);
-
-  function toggleTheme() {
-    setDarkMode(!darkMode);
-    document.documentElement.setAttribute(
-      "data-theme",
-      !darkMode ? "dark" : "light",
-    );
-  }
 
   return (
     <div className="container">
-      <div className="header-top" style={{ justifyContent: "space-between" }}>
-        <div style={{ fontSize: "14px", opacity: 0.7 }}>
-          Welcome, <strong>{currentUser}</strong>
+      {/* Top Bar */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "10px",
+        }}
+      >
+        <div style={{ opacity: 0.7 }}>
+          User: <strong>{currentUser}</strong>
         </div>
         <button
-          className="btn-logout"
+          className="btn-remove"
           onClick={onLogout}
-          style={{ marginBottom: "10px" }}
+          style={{ padding: "5px 10px", fontSize: "12px" }}
         >
           Logout
         </button>
@@ -159,40 +181,107 @@ function Dashboard({ currentUser, onLogout }) {
       />
 
       <div className="main-layout">
-        <Calendar habits={habits} onToggleHabit={toggleHabitForDate} />
-
-        <div className="analysis-section">
-          <div className="analysis-title">Analysis</div>
-          <Analysis
+        {/* LEFT COLUMN */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "20px",
+            minWidth: 0,
+          }}
+        >
+          {/* Calendar: Now receives date and change handler */}
+          <Calendar
             habits={habits}
-            daysInMonth={new Date(
-              new Date().getFullYear(),
-              new Date().getMonth() + 1,
-              0,
-            ).getDate()}
+            onToggleHabit={toggleHabitForDate}
+            currentDate={currentDate}
+            onChangeMonth={changeMonth}
+            bestStreak={bestStreak}
           />
 
-          <ProgressChart habits={habits} />
-
-          {/* NEW MENTAL GRID + CHART */}
-          <MentalChart mentalState={mentalState} />
-          <MentalStateGrid
-            mentalState={mentalState}
-            onUpdate={updateMentalState}
-          />
-
-          <button
-            className="add-habit-btn"
-            onClick={() => setShowAddModal(true)}
+          {/* Daily Progress: Now receives currentDate */}
+          <div
+            style={{
+              background: "var(--color-surface)",
+              padding: "20px",
+              borderRadius: "12px",
+              boxShadow: "var(--shadow-sm)",
+            }}
           >
-            +
-          </button>
-          <button
-            className="remove-habit-btn"
-            onClick={() => setShowRemoveModal(true)}
+            <h3 style={{ marginTop: 0 }}>
+              Daily Progress (
+              {currentDate.toLocaleString("default", { month: "long" })})
+            </h3>
+            <div className="chart-container">
+              <ProgressChart habits={habits} currentDate={currentDate} />
+            </div>
+          </div>
+
+          {/* Mental State Grid: Now receives currentDate */}
+          <div
+            style={{
+              background: "var(--color-surface)",
+              padding: "20px",
+              borderRadius: "12px",
+              boxShadow: "var(--shadow-sm)",
+            }}
           >
-            −
-          </button>
+            <MentalStateGrid
+              mentalState={mentalState}
+              onUpdate={updateMentalState}
+              currentDate={currentDate}
+            />
+          </div>
+
+          {/* Mental Trends: Now receives currentDate */}
+          <div
+            style={{
+              background: "var(--color-surface)",
+              padding: "20px",
+              borderRadius: "12px",
+              boxShadow: "var(--shadow-sm)",
+            }}
+          >
+            <h3 style={{ marginTop: 0 }}>
+              Mental State Trends (
+              {currentDate.toLocaleString("default", { month: "long" })})
+            </h3>
+            <div className="chart-container">
+              <MentalChart
+                mentalState={mentalState}
+                currentDate={currentDate}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN */}
+        <div className="analysis-section">
+          <h3>
+            Analysis ({currentDate.toLocaleString("default", { month: "long" })}
+            )
+          </h3>
+          <Analysis habits={habits} currentDate={currentDate} />
+
+          <div
+            className="action-buttons"
+            style={{ marginTop: "20px", display: "flex", gap: "10px" }}
+          >
+            <button
+              className="add-habit-btn"
+              onClick={() => setShowAddModal(true)}
+              style={{ flex: 1 }}
+            >
+              + Add Habit
+            </button>
+            <button
+              className="remove-habit-btn"
+              onClick={() => setShowRemoveModal(true)}
+              style={{ flex: 1 }}
+            >
+              − Remove
+            </button>
+          </div>
         </div>
       </div>
 

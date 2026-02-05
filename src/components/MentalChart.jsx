@@ -1,34 +1,30 @@
 import { useEffect, useRef } from "react";
 import { Chart } from "chart.js/auto";
 
-function MentalChart({ mentalState }) {
+function MentalChart({ mentalState, currentDate }) {
   const canvasRef = useRef(null);
   const chartRef = useRef(null);
 
   useEffect(() => {
-    // 1. Prepare Data for the last 7 days
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
     const labels = [];
     const moodData = [];
     const motivationData = [];
 
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      const dateStr = d.toISOString().split("T")[0];
-
-      labels.push(d.toLocaleDateString("en-US", { weekday: "short" }));
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      labels.push(d);
 
       const entry = mentalState[dateStr] || {};
       moodData.push(entry.mood || 0);
       motivationData.push(entry.motivation || 0);
     }
 
-    // 2. Destroy old chart
-    if (chartRef.current) {
-      chartRef.current.destroy();
-    }
+    if (chartRef.current) chartRef.current.destroy();
 
-    // 3. Create new Chart
     if (canvasRef.current) {
       chartRef.current = new Chart(canvasRef.current, {
         type: "bar",
@@ -38,35 +34,31 @@ function MentalChart({ mentalState }) {
             {
               label: "Mood",
               data: moodData,
-              backgroundColor: "rgba(54, 162, 235, 0.6)",
+              backgroundColor: "rgba(54, 162, 235, 0.7)",
             },
             {
               label: "Motivation",
               data: motivationData,
-              backgroundColor: "rgba(255, 206, 86, 0.6)",
+              backgroundColor: "rgba(255, 206, 86, 0.7)",
             },
           ],
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           scales: {
             y: { min: 0, max: 10 },
+            x: { grid: { display: false } },
           },
         },
       });
     }
-
     return () => {
       chartRef.current?.destroy();
     };
-  }, [mentalState]);
+  }, [mentalState, currentDate]);
 
-  return (
-    <div className="chart-container mental-state">
-      <div className="chart-title">Mental State (Last 7 Days)</div>
-      <canvas ref={canvasRef}></canvas>
-    </div>
-  );
+  return <canvas ref={canvasRef} style={{ height: "200px", width: "100%" }} />;
 }
 
 export default MentalChart;
