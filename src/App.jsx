@@ -3,14 +3,19 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // Store the actual username, not just "true"
+  const [currentUser, setCurrentUser] = useState(null);
 
   return (
     <>
-      {isLoggedIn ? (
-        <Dashboard onLogout={() => setIsLoggedIn(false)} />
+      {currentUser ? (
+        <Dashboard
+          currentUser={currentUser}
+          onLogout={() => setCurrentUser(null)}
+        />
       ) : (
-        <Login onLogin={() => setIsLoggedIn(true)} />
+        // Login now passes the username back to App
+        <Login onLogin={(username) => setCurrentUser(username)} />
       )}
     </>
   );

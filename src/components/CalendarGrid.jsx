@@ -1,116 +1,100 @@
-function formatDate(year, month, day) {
-  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-}
+import React from "react";
 
 function CalendarGrid({ date, habits, onToggleHabit }) {
   const year = date.getFullYear();
   const month = date.getMonth();
-
-  // Calendar Logic
-  const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-  // Create an array for the grid cells (padding nulls + actual days)
-  const cells = [];
-  for (let i = 0; i < firstDay; i++) cells.push(null);
-  for (let day = 1; day <= daysInMonth; day++) cells.push(day);
+  // Helper: Match date format (YYYY-MM-DD)
+  const getIsoDate = (day) => {
+    return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  };
 
-  // Helper to calculate daily stats
-  function getDailyStats(day) {
-    if (!day) return { done: 0, notDone: 0, progress: 0 };
-    const dateStr = formatDate(year, month, day);
-    let doneCount = 0;
+  // Helper: Calculate daily stats for bottom rows
+  const getDayStats = (day) => {
+    const dateStr = getIsoDate(day);
+    let completedCount = 0;
 
     habits.forEach((habit) => {
-      if (habit.completedDates.includes(dateStr)) doneCount++;
+      if (habit.completedDates.includes(dateStr)) {
+        completedCount++;
+      }
     });
 
-    return {
-      done: doneCount,
-      notDone: habits.length - doneCount,
-      progress:
-        habits.length > 0 ? Math.round((doneCount / habits.length) * 100) : 0,
-    };
-  }
+    const total = habits.length;
+    const progress =
+      total === 0 ? 0 : Math.round((completedCount / total) * 100);
+
+    return { completedCount, progress, notDone: total - completedCount };
+  };
 
   return (
-    <table className="calendar-table">
-      <thead>
-        <tr>
-          {/* Day Names Header */}
-          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-            <th key={d}>{d}</th>
-          ))}
-        </tr>
-      </thead>
-
-      <tbody>
-        {/* --- MAIN CALENDAR BODY --- */}
-        {Array.from({ length: Math.ceil(cells.length / 7) }).map((_, row) => (
-          <tr key={row}>
-            {cells.slice(row * 7, row * 7 + 7).map((day, idx) => {
-              if (!day) return <td key={idx} />; // Empty cell
-
-              const dateStr = formatDate(year, month, day);
-
-              return (
-                <td key={idx} className="calendar-cell">
-                  <div className="day-number">{day}</div>
-                  <div className="day-habits">
-                    {habits.map((habit) => {
-                      const completed = habit.completedDates.includes(dateStr);
-                      return (
-                        <span
-                          key={habit.id}
-                          className={`habit-dot ${completed ? "done" : ""}`}
-                          title={habit.name}
-                          onClick={() => onToggleHabit(habit.id, dateStr)}
-                        >
-                          {habit.emoji}
-                        </span>
-                      );
-                    })}
-                  </div>
-                </td>
-              );
-            })}
+    <div className="calendar-grid">
+      <table className="calendar-table">
+        <thead>
+          <tr>
+            <th
+              style={{
+                minWidth: "150px",
+                textAlign: "left",
+                paddingLeft: "10px",
+              }}
+            >
+              My Habits
+            </th>
+            {/* Day Numbers Header */}
+            {daysArray.map((day) => (
+              <th key={day} style={{ minWidth: "35px" }}>
+                {day}
+              </th>
+            ))}
           </tr>
-        ))}
+        </thead>
+        <tbody>
+          {/* 1. HABIT ROWS */}
+          {habits.map((habit) => (
+            <tr key={habit.id}>
+              <td className="habit-name">
+                {habit.emoji} {habit.name}
+              </td>
+              {daysArray.map((day) => {
+                const dateStr = getIsoDate(day);
+                const isChecked = habit.completedDates.includes(dateStr);
+                return (
+                  <td key={day}>
+                    <div
+                      className={`checkbox ${isChecked ? "checked" : ""}`}
+                      onClick={() => onToggleHabit(habit.id, dateStr)}
+                    ></div>
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
 
-        {/* --- SUMMARY ROWS (Matches Screenshot) --- */}
-
-        {/* 1. Progress % Row */}
-        <tr className="summary-row">
-          <td
-            colSpan={7}
-            style={{
-              textAlign: "left",
-              padding: "5px",
-              fontWeight: "bold",
-              background: "#eee",
-            }}
-          >
-            Daily Progress
-          </td>
-        </tr>
-        <tr>
-          {/* We iterate over the LAST 7 days or fit them into the grid structure. 
-               However, usually summary rows match the columns. 
-               Since the grid is 7 columns wide but month days vary, 
-               Summary rows usually work best in a "List View". 
-               
-               For this Grid View, let's render a simple summary for the VISIBLE days in the last row 
-               or just a global summary row if simpler.
-               
-               Actually, looking at your screenshot, the summary is at the bottom of the "Week View".
-               If this is Month view, we usually don't show daily summary per column because columns are weekdays, not specific dates.
-               
-               **FIX:** I will add a row that shows average stats for the week columns if possible, 
-               or we hide it for month view if it looks messy.
-           */}
-        </tr>
-      </tbody>
-    </table>
+          {/* 2. SUMMARY ROWS (Progress, Done, Not Done) */}
+          <tr className="summary-row">
+            <td>Progress</td>
+            {daysArray.map((day) => (
+              <td key={day}>{getDayStats(day).progress}%</td>
+            ))}
+          </tr>
+          <tr className="summary-row">
+            <td>Done</td>
+            {daysArray.map((day) => (
+              <td key={day}>{getDayStats(day).completedCount}</td>
+            ))}
+          </tr>
+          <tr className="summary-row">
+            <td>Not Done</td>
+            {daysArray.map((day) => (
+              <td key={day}>{getDayStats(day).notDone}</td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
+    </div>
   );
 }
 

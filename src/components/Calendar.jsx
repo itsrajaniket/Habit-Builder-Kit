@@ -27,21 +27,20 @@ function Calendar({ habits, onToggleHabit }) {
     setCurrentDate(newDate);
   }
 
-  // Calculate stats for child components
+  // Calculate best streak for the badges
   const bestStreak =
     habits.length > 0
-      ? Math.max(...habits.map((h) => h.completedDates?.length || 0))
+      ? Math.max(
+          ...habits.map((h) => {
+            // specific streak logic or just count length for now
+            return h.completedDates?.length || 0;
+          }),
+        )
       : 0;
-
-  const daysInMonth = new Date(
-    currentDate.getFullYear(),
-    currentDate.getMonth() + 1,
-    0,
-  ).getDate();
 
   return (
     <div className="calendar-section">
-      {/* 1. Month Header */}
+      {/* 1. Header with Month Name and Buttons */}
       <div className="month-header">
         <h2 className="month-title">
           {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
@@ -53,14 +52,14 @@ function Calendar({ habits, onToggleHabit }) {
         </div>
       </div>
 
-      {/* 2. Streaks & Badges (Matches screenshot layout) */}
+      {/* 2. The Stats Section */}
       <div className="streaks-badges-section">
         <Streaks habits={habits} />
         <Badges bestStreak={bestStreak} />
       </div>
 
-      {/* 3. The Grid */}
-      <div className="calendar-grid">
+      {/* 3. The Table Grid (This was likely missing or disconnected) */}
+      <div className="calendar-grid-container" style={{ overflowX: "auto" }}>
         <CalendarGrid
           date={currentDate}
           habits={habits}

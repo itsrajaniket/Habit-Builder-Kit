@@ -1,10 +1,11 @@
 import { useState } from "react";
-import "../styles/login.css";
 
 const USERS = {
   user1: "1234",
   user2: "1234",
   user3: "1234",
+  user4: "1234",
+  user5: "1234",
 };
 
 function Login({ onLogin }) {
@@ -17,14 +18,14 @@ function Login({ onLogin }) {
 
     if (USERS[username] === password) {
       setError("");
-      onLogin();
+      onLogin(username); // <--- PASS THE USERNAME HERE
     } else {
       setError("Invalid username or password");
     }
   }
 
   return (
-    <div className="login-container active">
+    <div className="login-container">
       <div className="login-box">
         <h1>🎯 Habit Tracker Pro</h1>
         <p className="login-subtitle">Track your habits, build your future</p>
@@ -57,6 +58,14 @@ function Login({ onLogin }) {
             Login
           </button>
         </form>
+
+        <p className="login-hint">
+          <strong>Test Users:</strong>
+          <br />
+          user1 / 1234
+          <br />
+          user2 / 1234
+        </p>
 
         {error && <div className="login-error">{error}</div>}
       </div>
