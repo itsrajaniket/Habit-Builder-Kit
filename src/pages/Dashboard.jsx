@@ -6,6 +6,7 @@ import MentalChart from "../components/MentalChart";
 import AddHabitModal from "../components/AddHabitModal";
 import RemoveHabitModal from "../components/RemoveHabitModal";
 import { calculateStreak } from "../utils/streaks";
+import Analysis from "../components/Analysis";
 
 function Dashboard({ onLogout }) {
   const [darkMode, setDarkMode] = useState(false);
@@ -16,7 +17,7 @@ function Dashboard({ onLogout }) {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [mentalState, setMentalState] = useState({}); // You can add persistence here later if needed
+  const [mentalState, setMentalState] = useState({});
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
@@ -114,6 +115,18 @@ function Dashboard({ onLogout }) {
 
         {/* Sidebar Analysis */}
         <div className="analysis-section">
+          {/* --- NEW ADDITION: Analysis Component --- */}
+          <div className="analysis-title">Analysis</div>
+          <Analysis
+            habits={habits}
+            daysInMonth={new Date(
+              new Date().getFullYear(),
+              new Date().getMonth() + 1,
+              0,
+            ).getDate()}
+          />
+          {/* -------------------------------------- */}
+
           <ProgressChart habits={habits} />
           <MentalChart />
 
