@@ -65,6 +65,12 @@ function Login({ onLogin }) {
           user1 / 1234
           <br />
           user2 / 1234
+          <br />
+          user3 / 1234
+          <br />
+          user4 / 1234
+          <br />
+          user5 / 1234
         </p>
 
         {error && <div className="login-error">{error}</div>}
