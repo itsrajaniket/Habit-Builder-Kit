@@ -97,7 +97,7 @@ function Dashboard({ currentUser, onLogout }) {
         </div>
 
         {/* RIGHT COLUMN: Sidebar */}
-        <Sidebar
+        <Sidebar // --------------------->>>make by ANIKET in 2026
           habits={habits}
           currentDate={currentDate}
           bestStreak={stats.bestStreak} // <--- Added this prop
