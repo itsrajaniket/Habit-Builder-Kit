@@ -97,7 +97,7 @@ export function useDashboardData(currentUser) {
         if (h.id === habitId) {
           const exists = h.completedDates.includes(dateStr);
           return {
-            ...h,
+            ...h, // made by aniket
             completedDates: exists
               ? h.completedDates.filter((d) => d !== dateStr)
               : [...h.completedDates, dateStr],
