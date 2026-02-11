@@ -97,7 +97,8 @@ function RemoveHabitModal({ isOpen, habits, onRemove, onClose }) {
             Done
           </button>
         </div>
-      </div>
+      </div>{" "}
+      // make my aniket
     </div>
   );
 }
