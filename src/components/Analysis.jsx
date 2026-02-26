@@ -32,12 +32,12 @@ function Analysis({ habits, currentDate }) {
 
         return (
           <div key={habit.id} className="analysis-item">
-            <div className="analysis-label">Goal</div>
-            <div className="analysis-value">{daysInMonth}</div>
-            <div className="analysis-label" style={{ gridColumn: 1 }}>
+            <div className="analysis-label">{habit.name}</div>
+            {/* <div className="analysis-value">{daysInMonth}</div> */}
+            <div className="analysis-label" style={{ gridColumn: 4 }}>
               {habit.emoji} {completed}
             </div>
-            <div className="analysis-bar" style={{ gridColumn: "2 / 4" }}>
+            <div className="analysis-bar" style={{ gridColumn: "1 / 4" }}>
               <div
                 className="analysis-bar-fill"
                 style={{ width: `${percent}%` }}
